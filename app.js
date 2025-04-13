@@ -1,166 +1,214 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const splash = document.getElementById("splashScreen");
-  const loginContainer = document.getElementById("loginContainer");
-  const loginForm = document.getElementById("loginForm");
-  const adminDashboard = document.getElementById("adminDashboard");
-  const supplierDashboard = document.getElementById("supplierDashboard");
-  const supplierResults = document.getElementById("supplierResults");
-  const supplierProductList = document.getElementById("supplierProductList");
-  const milkHistoryList = document.getElementById("milkHistoryList");
-
+// Splash screen timeout
+window.onload = function () {
   setTimeout(() => {
-    splash.classList.add("hidden");
-    loginContainer.classList.remove("hidden");
+    document.getElementById("splashScreen").classList.add("hidden");
+    document.getElementById("loginContainer").classList.remove("hidden");
   }, 3000);
+};
 
-  let currentUser = null;
+const adminCredentials = {
+  username: "nitish",
+  password: "Pawanyadav@9529",
+};
 
-  const users = JSON.parse(localStorage.getItem("users")) || {
-    "nitish": { password: "Pawanyadav@9529", type: "admin" }
-  };
+let currentUser = null;
 
-  const milkData = JSON.parse(localStorage.getItem("milkData")) || {};
-  const products = JSON.parse(localStorage.getItem("products")) || [];
+// Event listener for login
+document.getElementById("loginForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const username = document.getElementById("username").value.toLowerCase();
+  const password = document.getElementById("password").value;
 
-  function saveData() {
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("milkData", JSON.stringify(milkData));
-    localStorage.setItem("products", JSON.stringify(products));
-  }
-
-  loginForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-    const user = users[username];
-
-    if (user && user.password === password) {
-      currentUser = username;
-      loginContainer.classList.add("hidden");
-
-      if (user.type === "admin") {
-        adminDashboard.classList.remove("hidden");
-        displayProducts();
-      } else {
-        supplierDashboard.classList.remove("hidden");
-        displaySupplierData(username);
-      }
+  if (username === adminCredentials.username && password === adminCredentials.password) {
+    currentUser = { role: "admin", username: "nitish" };
+    showAdminDashboard();
+  } else {
+    const supplier = getSupplier(username);
+    if (supplier && supplier.password === password) {
+      currentUser = { role: "supplier", username };
+      showSupplierDashboard(supplier);
     } else {
-      alert("Invalid login.");
+      alert("Invalid credentials");
     }
-  });
-
-  window.addSupplier = function () {
-    const id = document.getElementById("supplierId").value;
-    const name = document.getElementById("supplierName").value;
-    const mobile = document.getElementById("supplierMobile").value;
-    const photoInput = document.getElementById("supplierPhoto");
-
-    if (users[id]) {
-      alert("User ID already exists.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      users[id] = {
-        name,
-        mobile,
-        password: "0000",
-        type: "supplier",
-        photo: reader.result
-      };
-      saveData();
-      alert("Supplier added successfully.");
-    };
-    if (photoInput.files[0]) {
-      reader.readAsDataURL(photoInput.files[0]);
-    } else {
-      users[id] = {
-        name,
-        mobile,
-        password: "0000",
-        type: "supplier",
-        photo: ""
-      };
-      saveData();
-      alert("Supplier added without photo.");
-    }
-  };
-
-  window.searchSupplier = function () {
-    const search = document.getElementById("searchInput").value.toLowerCase();
-    supplierResults.innerHTML = "";
-
-    Object.entries(users).forEach(([id, user]) => {
-      if (user.type === "supplier" &&
-          (id.includes(search) ||
-           user.name.toLowerCase().includes(search) ||
-           user.mobile.includes(search))) {
-
-        const div = document.createElement("div");
-        div.innerHTML = `<strong>${user.name}</strong> (${id}) - ${user.mobile}`;
-        supplierResults.appendChild(div);
-      }
-    });
-  };
-
-  window.addProduct = function () {
-    const name = document.getElementById("productName").value;
-    const price = parseFloat(document.getElementById("productPrice").value);
-    if (name && price) {
-      products.push({ name, price });
-      saveData();
-      displayProducts();
-    }
-  };
-
-  function displayProducts() {
-    const productList = document.getElementById("productList");
-    productList.innerHTML = "";
-    products.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.name} - ₹${p.price}`;
-      productList.appendChild(li);
-    });
-  }
-
-  function displaySupplierData(id) {
-    const user = users[id];
-    document.getElementById("supplierNameDisplay").textContent = user.name;
-    document.getElementById("supplierMobileDisplay").textContent = user.mobile;
-    document.getElementById("supplierPhotoDisplay").src = user.photo || "";
-
-    displayMilkHistory();
-    displayAvailableProducts();
-  }
-
-  window.submitMilk = function () {
-    const litres = parseFloat(document.getElementById("milkAmount").value);
-    if (!litres) return;
-    const date = new Date().toISOString().split("T")[0];
-    if (!milkData[currentUser]) milkData[currentUser] = [];
-    milkData[currentUser].push({ date, litres });
-    saveData();
-    displayMilkHistory();
-  };
-
-  function displayMilkHistory() {
-    milkHistoryList.innerHTML = "";
-    const records = milkData[currentUser] || [];
-    records.forEach(r => {
-      const li = document.createElement("li");
-      li.textContent = `${r.date} - ${r.litres} litres`;
-      milkHistoryList.appendChild(li);
-    });
-  }
-
-  function displayAvailableProducts() {
-    supplierProductList.innerHTML = "";
-    products.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.name} - ₹${p.price}`;
-      supplierProductList.appendChild(li);
-    });
   }
 });
+
+// Storage helpers
+function getSuppliers() {
+  return JSON.parse(localStorage.getItem("suppliers") || "{}");
+}
+
+function saveSuppliers(suppliers) {
+  localStorage.setItem("suppliers", JSON.stringify(suppliers));
+}
+
+function getSupplier(id) {
+  const suppliers = getSuppliers();
+  return suppliers[id];
+}
+
+function showAdminDashboard() {
+  document.getElementById("loginContainer").classList.add("hidden");
+  document.getElementById("adminDashboard").classList.remove("hidden");
+  loadSuppliers();
+  loadProducts();
+}
+
+function addSupplier() {
+  const id = document.getElementById("supplierId").value;
+  const name = document.getElementById("supplierName").value;
+  const mobile = document.getElementById("supplierMobile").value;
+  const photoInput = document.getElementById("supplierPhoto");
+
+  if (!id || !name || !mobile) return alert("Please fill all fields");
+
+  const reader = new FileReader();
+  reader.onload = function () {
+    const suppliers = getSuppliers();
+    suppliers[id] = {
+      id,
+      name,
+      mobile,
+      photo: reader.result,
+      password: "0000",
+      milkRecords: [],
+    };
+    saveSuppliers(suppliers);
+    alert("Supplier added!");
+    loadSuppliers();
+  };
+
+  if (photoInput.files[0]) reader.readAsDataURL(photoInput.files[0]);
+  else alert("Please add a photo.");
+}
+
+function loadSuppliers(filter = "") {
+  const results = document.getElementById("supplierResults");
+  results.innerHTML = "";
+  const suppliers = getSuppliers();
+
+  Object.values(suppliers).forEach(supplier => {
+    if (
+      supplier.name.toLowerCase().includes(filter.toLowerCase()) ||
+      supplier.mobile.includes(filter) ||
+      supplier.id.includes(filter)
+    ) {
+      const overdue = getOverdues(supplier);
+      const el = document.createElement("div");
+      el.innerHTML = `
+        <h4>${supplier.name} (${supplier.id})</h4>
+        <img src="${supplier.photo}" class="profile-pic" />
+        <p>Mobile: ${supplier.mobile}</p>
+        <p>Password: ${supplier.password}</p>
+        <p>Total Milk: ${getTotalMilk(supplier)} L</p>
+        <p>Overdue Days: ${overdue.length}</p>
+        <hr/>
+      `;
+      results.appendChild(el);
+    }
+  });
+}
+
+function searchSupplier() {
+  const value = document.getElementById("searchInput").value;
+  loadSuppliers(value);
+}
+
+function getTotalMilk(supplier) {
+  return supplier.milkRecords.reduce((sum, entry) => sum + entry.litres, 0);
+}
+
+function getOverdues(supplier) {
+  const allDates = getLastNDays(30); // check for past 30 days
+  const presentDates = supplier.milkRecords.map(rec => rec.date);
+  return allDates.filter(d => !presentDates.includes(d));
+}
+
+function getLastNDays(n) {
+  const dates = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().split("T")[0]);
+  }
+  return dates;
+}
+
+// Milk Submission for supplier
+function showSupplierDashboard(supplier) {
+  document.getElementById("loginContainer").classList.add("hidden");
+  document.getElementById("supplierDashboard").classList.remove("hidden");
+
+  document.getElementById("supplierNameDisplay").textContent = supplier.name;
+  document.getElementById("supplierMobileDisplay").textContent = supplier.mobile;
+  document.getElementById("supplierPhotoDisplay").src = supplier.photo;
+
+  loadSupplierMilkHistory(supplier);
+  loadProductsForSupplier();
+}
+
+function submitMilk() {
+  const litres = parseFloat(document.getElementById("milkAmount").value);
+  if (isNaN(litres) || litres <= 0) return alert("Enter valid milk amount");
+
+  const date = new Date().toISOString().split("T")[0];
+  const suppliers = getSuppliers();
+  const supplier = suppliers[currentUser.username];
+
+  supplier.milkRecords.push({ date, litres });
+  saveSuppliers(suppliers);
+  alert("Milk recorded!");
+  loadSupplierMilkHistory(supplier);
+}
+
+function loadSupplierMilkHistory(supplier) {
+  const list = document.getElementById("milkHistoryList");
+  list.innerHTML = "";
+  supplier.milkRecords.forEach(rec => {
+    const li = document.createElement("li");
+    li.textContent = `${rec.date}: ${rec.litres} L`;
+    list.appendChild(li);
+  });
+}
+
+// Product features
+function getProducts() {
+  return JSON.parse(localStorage.getItem("products") || "[]");
+}
+
+function saveProducts(products) {
+  localStorage.setItem("products", JSON.stringify(products));
+}
+
+function addProduct() {
+  const name = document.getElementById("productName").value;
+  const price = document.getElementById("productPrice").value;
+
+  if (!name || !price) return alert("Enter both product name and price");
+  const products = getProducts();
+  products.push({ name, price });
+  saveProducts(products);
+  loadProducts();
+}
+
+function loadProducts() {
+  const list = document.getElementById("productList");
+  list.innerHTML = "";
+  const products = getProducts();
+  products.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} - ₹${p.price}`;
+    list.appendChild(li);
+  });
+}
+
+function loadProductsForSupplier() {
+  const list = document.getElementById("supplierProductList");
+  list.innerHTML = "";
+  const products = getProducts();
+  products.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} - ₹${p.price}`;
+    list.appendChild(li);
+  });
+}
