@@ -1,105 +1,74 @@
 body {
+  font-family: 'Poppins', sans-serif;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f7f7f7;
-  color: #333;
+  padding: 0;
+  background: #f9f9f9;
+  text-align: center;
+}
+
+.splash {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: white;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.gvala-title {
+  font-size: 3.5em;
+  color: #1e88e5;
+  font-weight: 700;
+  animation: slideIn 1.5s ease-out;
+}
+
+.developed-by {
+  font-family: 'Caveat', cursive;
+  font-size: 1em;
+  color: #777;
+  margin-top: 10px;
+}
+
+.login, .app {
+  padding: 20px;
 }
 
 .hidden {
   display: none;
 }
 
-.splash {
-  background-color: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  animation: fadeOut 2s ease 3s forwards;
-}
-
-.logo {
-  width: 200px;
-  animation: fadeIn 1s ease;
-}
-
-.developed-by {
-  text-align: center;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: #555;
-  margin-top: -30px;
-  animation: slideIn 2s ease-in;
-}
-
-.login-container,
-.dashboard {
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-  background-color: #fff;
-  border-radius: 12px;
-  margin-top: 40px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  animation: fadeIn 0.6s ease-in;
-}
-
-input, button {
+input {
   padding: 10px;
-  margin: 8px 0;
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
+  margin: 10px;
+  width: 200px;
 }
 
 button {
-  background-color: #007bff;
+  padding: 10px 20px;
+  background: #1e88e5;
   color: white;
   border: none;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  border-radius: 5px;
 }
 
-button:hover {
-  background-color: #0056b3;
-}
-
-h2, h3 {
-  text-align: center;
-  color: #222;
-}
-
-.profile-pic {
-  display: block;
-  width: 100px;
-  border-radius: 50%;
-  margin: 0 auto 10px auto;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-ul li {
-  background: #f2f2f2;
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 8px;
+.note {
+  font-size: 0.8em;
+  color: #777;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  to { opacity: 0; display: none; }
+  to { opacity: 1; }
 }
 
 @keyframes slideIn {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
