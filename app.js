@@ -37,6 +37,52 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
 function getSuppliers() {
   return JSON.parse(localStorage.getItem("suppliers") || "{}");
 }
+// Load suppliers from localStorage when the app starts
+let suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
+
+// Save supplier to localStorage
+function addSupplier(supplier) {
+  suppliers.push(supplier);
+  localStorage.setItem("suppliers", JSON.stringify(suppliers));
+  alert("Supplier added and saved permanently!");
+  renderSuppliers();
+}
+
+// Call this function with form data
+function createSupplier() {
+  const name = prompt("Enter supplier name:");
+  const phone = prompt("Enter supplier mobile:");
+  const userId = "SUP" + Date.now();
+  const photo = ""; // can integrate photo upload later
+
+  const newSupplier = {
+    id: userId,
+    name: name,
+    phone: phone,
+    photo: photo,
+    password: "0000", // default
+    milkRecords: [],
+    absents: [],
+    payments: []
+  };
+
+  addSupplier(newSupplier);
+}
+
+// Display suppliers on screen
+function renderSuppliers() {
+  const container = document.getElementById("dashboard");
+  container.innerHTML = `<h3>Suppliers</h3>`;
+  suppliers.forEach(s => {
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${s.name}</strong> (${s.phone}) - ID: ${s.id}`;
+    container.appendChild(div);
+  });
+}
+
+// Initial render
+renderSuppliers();
+
 
 function saveSuppliers(suppliers) {
   localStorage.setItem("suppliers", JSON.stringify(suppliers));
