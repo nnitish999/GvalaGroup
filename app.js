@@ -301,63 +301,6 @@ function checkLoginSession() {
 }
 window.onload = checkLoginSession;
 
-// ----------------- Admin-Supplier Chat ------------------
-function openChatWith(id) {
-  const messages = JSON.parse(localStorage.getItem(`chat_${id}`) || "[]");
-  const chatUI = messages.map(msg => `
-    <div class="${msg.sender === 'admin' ? 'admin-msg' : 'supplier-msg'}">
-      <b>${msg.sender}</b>: ${msg.text}
-    </div>
-  `).join("");
-
-  const box = `
-    <div style="border:1px solid #ccc; padding:10px">
-      <h4>Chat with ${id}</h4>
-      <div id="chat-box">${chatUI}</div>
-      <input id="chat-text" placeholder="Type message..."/>
-      <button onclick="sendChatMessage('${id}')">Send</button>
-    </div>
-  `;
-  document.getElementById("admin-content").innerHTML = box;
-}
-
-function sendChatMessage(to) {
-  const input = document.getElementById("chat-text");
-  const msg = input.value.trim();
-  if (!msg) return;
-  const messages = JSON.parse(localStorage.getItem(`chat_${to}`) || "[]");
-  messages.push({ sender: "admin", text: msg, time: new Date().toISOString() });
-  localStorage.setItem(`chat_${to}`, JSON.stringify(messages));
-  openChatWith(to);
-}
-
-// ----------------- Supplier Chat View ------------------
-function supplierChatView(id) {
-  const messages = JSON.parse(localStorage.getItem(`chat_${id}`) || "[]");
-  const chatUI = messages.map(msg => `
-    <div class="${msg.sender === 'admin' ? 'admin-msg' : 'supplier-msg'}">
-      <b>${msg.sender}</b>: ${msg.text}
-    </div>
-  `).join("");
-
-  const box = `
-    <h3>Chat with Admin</h3>
-    <div id="chat-box">${chatUI}</div>
-    <input id="supplier-chat-text" placeholder="Message"/>
-    <button onclick="supplierSendMessage('${id}')">Send</button>
-  `;
-  document.getElementById("supplier-content").innerHTML = box;
-}
-
-function supplierSendMessage(id) {
-  const input = document.getElementById("supplier-chat-text");
-  const msg = input.value.trim();
-  if (!msg) return;
-  const messages = JSON.parse(localStorage.getItem(`chat_${id}`) || "[]");
-  messages.push({ sender: "supplier", text: msg, time: new Date().toISOString() });
-  localStorage.setItem(`chat_${id}`, JSON.stringify(messages));
-  supplierChatView(id);
-}
 
 // ----------------- Supplier Password Change ------------------
 function showPasswordChangePanel(id) {
