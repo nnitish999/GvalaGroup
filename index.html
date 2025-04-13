@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gvala App</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div id="splashScreen" class="splash">
+    <div>
+      <img src="logo.png" alt="Gvala Logo" class="logo" />
+      <div class="developed-by">Developed by Nitish</div>
+    </div>
+  </div>
+
+  <div id="loginContainer" class="login-container hidden">
+    <h2>Gvala Login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="User ID" required/>
+      <input type="password" id="password" placeholder="Password" required/>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <div id="adminDashboard" class="dashboard hidden">
+    <h2>Admin Dashboard</h2>
+    <input type="text" id="supplierId" placeholder="Supplier ID"/>
+    <input type="text" id="supplierName" placeholder="Supplier Name"/>
+    <input type="text" id="supplierMobile" placeholder="Mobile Number"/>
+    <input type="file" id="supplierPhoto"/>
+    <button onclick="addSupplier()">Add Supplier</button>
+
+    <h3>Search Supplier</h3>
+    <input type="text" id="searchInput" oninput="searchSupplier()" placeholder="Search by name, id or mobile"/>
+    <div id="supplierResults"></div>
+
+    <h3>Add Product</h3>
+    <input type="text" id="productName" placeholder="Product Name"/>
+    <input type="number" id="productPrice" placeholder="Price"/>
+    <button onclick="addProduct()">Add Product</button>
+    <ul id="productList"></ul>
+  </div>
+
+  <div id="supplierDashboard" class="dashboard hidden">
+    <h2>Supplier Panel</h2>
+    <img id="supplierPhotoDisplay" class="profile-pic" />
+    <p><strong>Name:</strong> <span id="supplierNameDisplay"></span></p>
+    <p><strong>Mobile:</strong> <span id="supplierMobileDisplay"></span></p>
+
+    <h3>Submit Milk</h3>
+    <input type="number" id="milkAmount" placeholder="Enter Litres"/>
+    <button onclick="submitMilk()">Submit</button>
+
+    <h3>Milk History</h3>
+    <ul id="milkHistoryList"></ul>
+
+    <h3>Available Products</h3>
+    <ul id="supplierProductList"></ul>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
