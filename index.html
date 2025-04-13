@@ -2,83 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gvala - Milk Management</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gvala - Milk Collection App</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <!-- Splash Screen -->
-  <div id="splashScreen" class="splash">
-    <img src="logo.png" alt="Gvala Logo" class="logo" />
+  <div id="splash">
+    <h1 class="logo">Gvala Group</h1>
+    <p class="credit">Developed by <span>Nitish</span></p>
   </div>
-  <div id="developedBy" class="developed-by">Developed by Nitish</div>
 
-  <!-- Login -->
-  <div id="loginContainer" class="login-container hidden">
-    <h2>Login to Gvala</h2>
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="User ID" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
+  <!-- Login Screen -->
+  <div id="login-screen" class="hidden">
+    <h2>Login</h2>
+    <input type="text" id="login-username" placeholder="Username" />
+    <input type="password" id="login-password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p id="login-error"></p>
   </div>
 
   <!-- Admin Dashboard -->
-  <div id="adminDashboard" class="dashboard hidden">
-   
-    <h2>Admin Dashboard</h2>
-<div id="dashboard"></div>
+  <div id="admin-panel" class="hidden">
+    <h2>Welcome, Admin Nitish</h2>
+    <button onclick="logout()">Logout</button>
 
-    <section class="add-supplier">
-      <h3>Add Supplier</h3>
-      <input type="text" id="supplierId" placeholder="User ID" />
-      <input type="text" id="supplierName" placeholder="Name" />
-      <input type="text" id="supplierMobile" placeholder="Mobile Number" />
-      <input type="file" id="supplierPhoto" accept="image/*" />
-      <button onclick="addSupplier()">Add Supplier</button>
-    </section>
-<button onclick="createSupplier()">Add Supplier</button>
+    <h3>Add Supplier</h3>
+    <input type="text" id="sup-name" placeholder="Name" />
+    <input type="text" id="sup-phone" placeholder="Mobile" />
+    <input type="file" id="sup-photo" accept="image/*" />
+    <button onclick="addSupplier()">Add Supplier</button>
 
-    
-    <section class="supplier-list">
-      <h3>Supplier Records</h3>
-      <input type="text" id="searchInput" placeholder="Search by Name/Mobile/ID" oninput="searchSupplier()" />
-      <div id="supplierResults"></div>
-    </section>
+    <h3>All Suppliers</h3>
+    <input type="text" id="search-input" placeholder="Search suppliers..." oninput="renderSuppliers()" />
+    <div id="supplier-list"></div>
 
-    <section class="product-catalog">
-      <h3>Products to Sell</h3>
-      <input type="text" id="productName" placeholder="Product Name" />
-      <input type="text" id="productPrice" placeholder="Price ₹" />
-      <button onclick="addProduct()">Add Product</button>
-      <ul id="productList"></ul>
-    </section>
+    <h3>Milk Records & Analytics</h3>
+    <div id="milk-summary"></div>
+    <button onclick="exportData()">Export to CSV</button>
+    <canvas id="milkChart" width="400" height="200"></canvas>
+
+    <h3>Product Listing</h3>
+    <input type="text" id="product-name" placeholder="Product name" />
+    <input type="number" id="product-price" placeholder="Price" />
+    <button onclick="addProduct()">Add Product</button>
+    <div id="product-list"></div>
   </div>
 
-  <!-- Supplier Dashboard -->
-  <div id="supplierDashboard" class="dashboard hidden">
-    <h2>Welcome <span id="supplierNameDisplay"></span></h2>
-    <img id="supplierPhotoDisplay" class="profile-pic" />
-    <p><strong>Mobile:</strong> <span id="supplierMobileDisplay"></span></p>
-
-    <section>
-      <h3>Daily Milk Entry</h3>
-      <input type="number" id="milkAmount" placeholder="Litres Today" />
-      <button onclick="submitMilk()">Submit</button>
-    </section>
-
-    <section>
-      <h3>Milk History</h3>
-      <ul id="milkHistoryList"></ul>
-    </section>
-
-    <section>
-      <h3>Available Products</h3>
-      <ul id="supplierProductList"></ul>
-    </section>
+  <!-- Supplier Panel -->
+  <div id="supplier-panel" class="hidden">
+    <h2>Welcome, <span id="supplier-name"></span></h2>
+    <button onclick="logout()">Logout</button>
+    <div id="supplier-profile"></div>
+    <div id="attendance-calendar"></div>
+    <div id="chat-box"></div>
+    <input type="text" id="chat-input" placeholder="Message..." />
+    <button onclick="sendMessage()">Send</button>
+    <h3>Available Products</h3>
+    <div id="view-products"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
