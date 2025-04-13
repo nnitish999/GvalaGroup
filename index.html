@@ -3,42 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gvala App</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <title>Gvala - Milk Management</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+
   <!-- Splash Screen -->
-  <div id="splash-screen" class="splash">
-    <h1 class="gvala-title">Gvala Groups</h1>
-    <p class="developed-by">Developed by Nitish</p>
+  <div id="splashScreen" class="splash">
+    <img src="logo.png" alt="Gvala Logo" class="logo" />
   </div>
+  <div id="developedBy" class="developed-by">Developed by Nitish</div>
 
-  <!-- Login Screen -->
-  <div id="login-screen" class="login hidden">
+  <!-- Login -->
+  <div id="loginContainer" class="login-container hidden">
     <h2>Login to Gvala</h2>
-    <input type="text" id="username" placeholder="Username or ID" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <p class="note">Default supplier password: 0000</p>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="User ID" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
   </div>
 
-  <!-- Main App -->
-  <div id="app" class="app hidden">
-    <div class="header">
-      <h2>Welcome to Gvala</h2>
-      <button onclick="logout()">Logout</button>
-    </div>
-    <div id="dashboard"></div>
+  <!-- Admin Dashboard -->
+  <div id="adminDashboard" class="dashboard hidden">
+    <h2>Admin Dashboard</h2>
+
+    <section class="add-supplier">
+      <h3>Add Supplier</h3>
+      <input type="text" id="supplierId" placeholder="User ID" />
+      <input type="text" id="supplierName" placeholder="Name" />
+      <input type="text" id="supplierMobile" placeholder="Mobile Number" />
+      <input type="file" id="supplierPhoto" accept="image/*" />
+      <button onclick="addSupplier()">Add Supplier</button>
+    </section>
+
+    <section class="supplier-list">
+      <h3>Supplier Records</h3>
+      <input type="text" id="searchInput" placeholder="Search by Name/Mobile/ID" oninput="searchSupplier()" />
+      <div id="supplierResults"></div>
+    </section>
+
+    <section class="product-catalog">
+      <h3>Products to Sell</h3>
+      <input type="text" id="productName" placeholder="Product Name" />
+      <input type="text" id="productPrice" placeholder="Price ₹" />
+      <button onclick="addProduct()">Add Product</button>
+      <ul id="productList"></ul>
+    </section>
   </div>
 
-  <script>
-    // Splash transition
-    setTimeout(() => {
-      document.getElementById("splash-screen").style.display = "none";
-      document.getElementById("login-screen").classList.remove("hidden");
-    }, 3000);
-  </script>
-  <script src="gvala-app.js"></script>
+  <!-- Supplier Dashboard -->
+  <div id="supplierDashboard" class="dashboard hidden">
+    <h2>Welcome <span id="supplierNameDisplay"></span></h2>
+    <img id="supplierPhotoDisplay" class="profile-pic" />
+    <p><strong>Mobile:</strong> <span id="supplierMobileDisplay"></span></p>
+
+    <section>
+      <h3>Daily Milk Entry</h3>
+      <input type="number" id="milkAmount" placeholder="Litres Today" />
+      <button onclick="submitMilk()">Submit</button>
+    </section>
+
+    <section>
+      <h3>Milk History</h3>
+      <ul id="milkHistoryList"></ul>
+    </section>
+
+    <section>
+      <h3>Available Products</h3>
+      <ul id="supplierProductList"></ul>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
