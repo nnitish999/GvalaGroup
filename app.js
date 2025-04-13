@@ -209,7 +209,85 @@ function submitMilk() {
 
 function loadSupplierMilkHistory(supplier) {
   const list = document.getElementById("milkHistoryList");
-  list.innerHTML = "";
+  list.innerHTML = "";// Load from localStorage
+let suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
+let milkRecords = JSON.parse(localStorage.getItem("milkRecords")) || [];
+
+// Save changes
+function saveSuppliers() {
+  localStorage.setItem("suppliers", JSON.stringify(suppliers));
+}
+
+function saveMilkRecords() {
+  localStorage.setItem("milkRecords", JSON.stringify(milkRecords));
+}
+
+// Delete Supplier
+function deleteSupplier(id) {
+  if (confirm("Are you sure you want to delete this supplier?")) {
+    suppliers = suppliers.filter(s => s.id !== id);
+    saveSuppliers();
+    renderSuppliers();
+  }
+}
+
+// Render supplier list with delete option
+function renderSuppliers() {
+  const container = document.getElementById("dashboard");
+  container.innerHTML = `<h3>All Suppliers</h3>`;
+  suppliers.forEach(s => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <strong>${s.name}</strong> (${s.phone}) - ID: ${s.id}
+      <button onclick="deleteSupplier('${s.id}')">Delete</button>
+    `;
+    container.appendChild(div);
+  });
+
+  // Option to view daily milk summary
+  const summaryBtn = document.createElement("button");
+  summaryBtn.textContent = "View Daily Milk Summary";
+  summaryBtn.onclick = showMilkSummary;
+  container.appendChild(summaryBtn);
+}
+
+// Show date-wise milk shortage and absent list
+function showMilkSummary() {
+  const container = document.getElementById("dashboard");
+  container.innerHTML = `<h3>Milk Summary</h3>`;
+
+  let summary = {};
+
+  milkRecords.forEach(record => {
+    const { date, supplierId, litres } = record;
+    if (!summary[date]) {
+      summary[date] = { total: 0, absentees: [] };
+    }
+    summary[date].total += litres;
+  });
+
+  suppliers.forEach(supplier => {
+    milkRecords.forEach(record => {
+      if (!milkRecords.find(r => r.date === record.date && r.supplierId === supplier.id)) {
+        if (!summary[record.date].absentees.includes(supplier.name)) {
+          summary[record.date].absentees.push(supplier.name);
+        }
+      }
+    });
+  });
+
+  for (let date in summary) {
+    const div = document.createElement("div");
+    const { total, absentees } = summary[date];
+    div.innerHTML = `
+      <strong>${date}</strong>: 
+      <br>Milk Received: ${total} litres
+      <br>Absent: ${absentees.join(", ") || "None"}
+    `;
+    container.appendChild(div);
+  }
+}
+
   supplier.milkRecords.forEach(rec => {
     const li = document.createElement("li");
     li.textContent = `${rec.date}: ${rec.litres} L`;
