@@ -1,111 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gvala - Milk Collection App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gvala App</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    /* Splash Animation */
-    #splash {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      animation: fadeOut 2.5s ease-out forwards 2s;
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
-    }
-
-    .logo {
-      font-size: 3rem;
-      font-weight: bold;
-      color: #1e88e5;
-      animation: slideIn 1s ease-out;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .credit {
-      font-size: 0.8rem;
-      font-family: 'Cursive', sans-serif;
-      color: #888;
-      margin-top: 1rem;
-    }
-
-    .credit span {
-      font-weight: bold;
-      color: #000;
-    }
-  </style>
 </head>
 <body>
-  <!-- Splash Screen -->
+
   <div id="splash">
-    <h1 class="logo">Gvala Group</h1>
+    <h1 class="gvala-title">Gvala Group</h1>
     <p class="credit">Developed by <span>Nitish</span></p>
   </div>
 
-  <!-- Login Screen -->
-  <div id="login-screen" class="hidden">
-    <h2>Login</h2>
-    <input type="text" id="login-username" placeholder="Username" />
-    <input type="password" id="login-password" placeholder="Password" />
+  <div id="login-container" style="display:none;">
+    <h2>Login to Gvala</h2>
+    <input type="text" id="username" placeholder="User ID or Admin Name" />
+    <input type="password" id="password" placeholder="Password" />
     <button onclick="login()">Login</button>
-    <p id="login-error"></p>
   </div>
 
-  <!-- Admin Dashboard -->
-  <div id="admin-panel" class="hidden">
-    <h2>Welcome, Admin Nitish</h2>
-    <button onclick="logout()">Logout</button>
-
-    <h3>Add Supplier</h3>
-    <input type="text" id="sup-name" placeholder="Name" />
-    <input type="text" id="sup-phone" placeholder="Mobile" />
-    <input type="file" id="sup-photo" accept="image/*" />
-    <button onclick="addSupplier()">Add Supplier</button>
-
-    <h3>All Suppliers</h3>
-    <input type="text" id="search-input" placeholder="Search suppliers..." oninput="renderSuppliers()" />
-    <div id="supplier-list"></div>
-
-    <h3>Milk Records & Analytics</h3>
-    <div id="milk-summary"></div>
-    <button onclick="exportData()">Export to CSV</button>
-    <canvas id="milkChart" width="400" height="200"></canvas>
-
-    <h3>Product Listing</h3>
-    <input type="text" id="product-name" placeholder="Product name" />
-    <input type="number" id="product-price" placeholder="Price" />
-    <button onclick="addProduct()">Add Product</button>
-    <div id="product-list"></div>
+  <div id="app" style="display:none;">
+    <!-- App content goes here -->
   </div>
 
-  <!-- Supplier Panel -->
-  <div id="supplier-panel" class="hidden">
-    <h2>Welcome, <span id="supplier-name"></span></h2>
-    <button onclick="logout()">Logout</button>
-    <div id="supplier-profile"></div>
-    <div id="attendance-calendar"></div>
-    <div id="chat-box"></div>
-    <input type="text" id="chat-input" placeholder="Message..." />
-    <button onclick="sendMessage()">Send</button>
-    <h3>Available Products</h3>
-    <div id="view-products"></div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
