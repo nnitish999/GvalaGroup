@@ -1,0 +1,105 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f7f7f7;
+  color: #333;
+}
+
+.hidden {
+  display: none;
+}
+
+.splash {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  animation: fadeOut 2s ease 3s forwards;
+}
+
+.logo {
+  width: 200px;
+  animation: fadeIn 1s ease;
+}
+
+.developed-by {
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #555;
+  margin-top: -30px;
+  animation: slideIn 2s ease-in;
+}
+
+.login-container,
+.dashboard {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 12px;
+  margin-top: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  animation: fadeIn 0.6s ease-in;
+}
+
+input, button {
+  padding: 10px;
+  margin: 8px 0;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+h2, h3 {
+  text-align: center;
+  color: #222;
+}
+
+.profile-pic {
+  display: block;
+  width: 100px;
+  border-radius: 50%;
+  margin: 0 auto 10px auto;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  background: #f2f2f2;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; display: none; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
