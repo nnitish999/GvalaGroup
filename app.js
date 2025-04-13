@@ -1,338 +1,397 @@
-// Splash screen timeout
-window.onload = function () {
+window.onload = () => {
   setTimeout(() => {
-    document.getElementById("splashScreen").classList.add("hidden");
-    document.getElementById("loginContainer").classList.remove("hidden");
+    document.getElementById("splash").classList.add("hidden");
+    document.getElementById("login-section").classList.remove("hidden");
   }, 3000);
 };
 
-const adminCredentials = {
-  username: "nitish",
-  password: "Pawanyadav@9529",
-};
+function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-let currentUser = null;
-
-// Event listener for login
-document.getElementById("loginForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-  const username = document.getElementById("username").value.toLowerCase();
-  const password = document.getElementById("password").value;
-
-  if (username === adminCredentials.username && password === adminCredentials.password) {
-    currentUser = { role: "admin", username: "nitish" };
-    showAdminDashboard();
+  if (username === "Nitish" && password === "Pawanyadav@9529") {
+    localStorage.setItem("userType", "admin");
+    showAdminPanel();
   } else {
-    const supplier = getSupplier(username);
-    if (supplier && supplier.password === password) {
-      currentUser = { role: "supplier", username };
-      showSupplierDashboard(supplier);
+    const suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
+    const supplier = suppliers.find(s => s.id === username && s.password === password);
+    if (supplier) {
+      localStorage.setItem("userType", "supplier");
+      localStorage.setItem("currentSupplier", supplier.id);
+      showSupplierPanel(supplier);
     } else {
-      alert("Invalid credentials");
+      alert("Invalid login credentials!");
     }
   }
-});
+}
 
-// Storage helpers
+function showAdminPanel() {
+  document.getElementById("login-section").classList.add("hidden");
+  document.getElementById("admin-panel").classList.remove("hidden");
+}
+
+function showSupplierPanel(supplier) {
+  document.getElementById("login-section").classList.add("hidden");
+  document.getElementById("supplier-panel").classList.remove("hidden");
+  document.getElementById("supplier-content").innerHTML = `
+    <h3>Welcome, ${supplier.name}</h3>
+    <p>User ID: <strong>${supplier.id}</strong></p>
+    <p>Total Milk: ${supplier.totalMilk || 0} litres</p>
+  `;
+}
+// Utilities
 function getSuppliers() {
-  return JSON.parse(localStorage.getItem("suppliers") || "{}");
+  return JSON.parse(localStorage.getItem("suppliers")) || [];
 }
-// Load suppliers from localStorage when the app starts
-let suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
-
-// Save supplier to localStorage
-function addSupplier(supplier) {
-  suppliers.push(supplier);
-  localStorage.setItem("suppliers", JSON.stringify(suppliers));
-  alert("Supplier added and saved permanently!");
-  renderSuppliers();
-}
-
-// Call this function with form data
-function createSupplier() {
-  const name = prompt("Enter supplier name:");
-  const phone = prompt("Enter supplier mobile:");
-  const userId = "SUP" + Date.now();
-  const photo = ""; // can integrate photo upload later
-
-  const newSupplier = {
-    id: userId,
-    name: name,
-    phone: phone,
-    photo: photo,
-    password: "0000", // default
-    milkRecords: milkrecord,
-    absents: absent,
-    payments: payment
-  };
-
-  addSupplier(newSupplier);
-}
-
-// Display suppliers on screen
-function renderSuppliers() {
-  const container = document.getElementById("dashboard");
-  container.innerHTML = `<h3>Suppliers</h3>`;
-  suppliers.forEach(s => {
-    const div = document.createElement("div");
-    div.innerHTML = `<strong>${s.name}</strong> (${s.phone}) - ID: ${s.id}`;
-    container.appendChild(div);
-  });
-}
-
-// Initial render
-renderSuppliers();
-
 
 function saveSuppliers(suppliers) {
   localStorage.setItem("suppliers", JSON.stringify(suppliers));
 }
 
-function getSupplier(id) {
-  const suppliers = getSuppliers();
-  return suppliers[id];
+// Add Supplier UI
+function showAddSupplier() {
+  const form = `
+    <h3>Add New Supplier</h3>
+    <input type="text" id="new-name" placeholder="Name" required/>
+    <input type="text" id="new-id" placeholder="User ID" required/>
+    <input type="text" id="new-mobile" placeholder="Mobile Number" />
+    <input type="file" id="new-photo" accept="image/*"/>
+    <button onclick="addSupplier()">Add Supplier</button>
+  `;
+  document.getElementById("admin-content").innerHTML = form;
 }
 
-function showAdminDashboard() {
-  document.getElementById("loginContainer").classList.add("hidden");
-  document.getElementById("adminDashboard").classList.remove("hidden");
-  loadSuppliers();
-  loadProducts();
-}
-
+// Add Supplier Logic
 function addSupplier() {
-  const id = document.getElementById("supplierId").value;
-  const name = document.getElementById("supplierName").value;
-  const mobile = document.getElementById("supplierMobile").value;
-  const photoInput = document.getElementById("supplierPhoto");
+  const name = document.getElementById("new-name").value;
+  const id = document.getElementById("new-id").value;
+  const mobile = document.getElementById("new-mobile").value;
+  const file = document.getElementById("new-photo").files[0];
 
-  if (!id || !name || !mobile) return alert("Please fill all fields");
+  if (!name || !id) {
+    alert("Please fill in all fields!");
+    return;
+  }
 
-  const reader = new FileReader();
+  let reader = new FileReader();
   reader.onload = function () {
     const suppliers = getSuppliers();
-    suppliers[id] = {
-      id,
+    if (suppliers.find(s => s.id === id)) {
+      alert("Supplier with this ID already exists!");
+      return;
+    }
+
+    suppliers.push({
       name,
+      id,
       mobile,
       photo: reader.result,
       password: "0000",
-      milkRecords: [],
-    };
+      records: [],
+      totalMilk: 0,
+      paid: false
+    });
+
     saveSuppliers(suppliers);
     alert("Supplier added!");
-    loadSuppliers();
+    renderSuppliers();
   };
 
-  if (photoInput.files[0]) reader.readAsDataURL(photoInput.files[0]);
-  else alert("Please add a photo.");
-}
-
-function loadSuppliers(filter = "") {
-  const results = document.getElementById("supplierResults");
-  results.innerHTML = "";
-  const suppliers = getSuppliers();
-
-  Object.values(suppliers).forEach(supplier => {
-    if (
-      supplier.name.toLowerCase().includes(filter.toLowerCase()) ||
-      supplier.mobile.includes(filter) ||
-      supplier.id.includes(filter)
-    ) {
-      const overdue = getOverdues(supplier);
-      const el = document.createElement("div");
-      el.innerHTML = `
-        <h4>${supplier.name} (${supplier.id})</h4>
-        <img src="${supplier.photo}" class="profile-pic" />
-        <p>Mobile: ${supplier.mobile}</p>
-        <p>Password: ${supplier.password}</p>
-        <p>Total Milk: ${getTotalMilk(supplier)} L</p>
-        <p>Overdue Days: ${overdue.length}</p>
-        <hr/>
-      `;
-      results.appendChild(el);
-    }
-  });
-}
-
-function searchSupplier() {
-  const value = document.getElementById("searchInput").value;
-  loadSuppliers(value);
-}
-
-function getTotalMilk(supplier) {
-  return supplier.milkRecords.reduce((sum, entry) => sum + entry.litres, 0);
-}
-
-function getOverdues(supplier) {
-  const allDates = getLastNDays(30); // check for past 30 days
-  const presentDates = supplier.milkRecords.map(rec => rec.date);
-  return allDates.filter(d => !presentDates.includes(d));
-}
-
-function getLastNDays(n) {
-  const dates = [];
-  for (let i = 0; i < n; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    dates.push(d.toISOString().split("T")[0]);
-  }
-  return dates;
-}
-
-// Milk Submission for supplier
-function showSupplierDashboard(supplier) {
-  document.getElementById("loginContainer").classList.add("hidden");
-  document.getElementById("supplierDashboard").classList.remove("hidden");
-
-  document.getElementById("supplierNameDisplay").textContent = supplier.name;
-  document.getElementById("supplierMobileDisplay").textContent = supplier.mobile;
-  document.getElementById("supplierPhotoDisplay").src = supplier.photo;
-
-  loadSupplierMilkHistory(supplier);
-  loadProductsForSupplier();
-}
-
-function submitMilk() {
-  const litres = parseFloat(document.getElementById("milkAmount").value);
-  if (isNaN(litres) || litres <= 0) return alert("Enter valid milk amount");
-
-  const date = new Date().toISOString().split("T")[0];
-  const suppliers = getSuppliers();
-  const supplier = suppliers[currentUser.username];
-
-  supplier.milkRecords.push({ date, litres });
-  saveSuppliers(suppliers);
-  alert("Milk recorded!");
-  loadSupplierMilkHistory(supplier);
-}
-
-function loadSupplierMilkHistory(supplier) {
-  const list = document.getElementById("milkHistoryList");
-  list.innerHTML = "";// Load from localStorage
-let suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
-let milkRecords = JSON.parse(localStorage.getItem("milkRecords")) || [];
-
-// Save changes
-function saveSuppliers() {
-  localStorage.setItem("suppliers", JSON.stringify(suppliers));
-}
-
-function saveMilkRecords() {
-  localStorage.setItem("milkRecords", JSON.stringify(milkRecords));
-}
-
-// Delete Supplier
-function deleteSupplier(id) {
-  if (confirm("Are you sure you want to delete this supplier?")) {
-    suppliers = suppliers.filter(s => s.id !== id);
-    saveSuppliers();
+  if (file) {
+    reader.readAsDataURL(file);
+  } else {
+    // Default image
+    const suppliers = getSuppliers();
+    suppliers.push({
+      name,
+      id,
+      mobile,
+      photo: null,
+      password: "0000",
+      records: [],
+      totalMilk: 0,
+      paid: false
+    });
+    saveSuppliers(suppliers);
+    alert("Supplier added!");
     renderSuppliers();
   }
 }
 
-// Render supplier list with delete option
+// View Suppliers List
 function renderSuppliers() {
-  const container = document.getElementById("dashboard");
-  container.innerHTML = `<h3>All Suppliers</h3>`;
-  suppliers.forEach(s => {
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <strong>${s.name}</strong> (${s.phone}) - ID: ${s.id}
+  const suppliers = getSuppliers();
+  const content = suppliers.map(s => `
+    <div class="supplier-card">
+      <img src="${s.photo || 'https://via.placeholder.com/80'}" width="80" height="80"/>
+      <h4>${s.name}</h4>
+      <p>ID: ${s.id}</p>
+      <p>Mobile: ${s.mobile}</p>
+      <button onclick="recordMilk('${s.id}')">Add Milk</button>
+      <button onclick="viewSupplierDetail('${s.id}')">Details</button>
       <button onclick="deleteSupplier('${s.id}')">Delete</button>
-    `;
-    container.appendChild(div);
-  });
+    </div>
+  `).join("");
 
-  // Option to view daily milk summary
-  const summaryBtn = document.createElement("button");
-  summaryBtn.textContent = "View Daily Milk Summary";
-  summaryBtn.onclick = showMilkSummary;
-  container.appendChild(summaryBtn);
+  document.getElementById("admin-content").innerHTML = `<div class="supplier-grid">${content}</div>`;
 }
 
-// Show date-wise milk shortage and absent list
-function showMilkSummary() {
-  const container = document.getElementById("dashboard");
-  container.innerHTML = `<h3>Milk Summary</h3>`;
+// Delete supplier
+function deleteSupplier(id) {
+  if (!confirm("Are you sure?")) return;
+  const suppliers = getSuppliers().filter(s => s.id !== id);
+  saveSuppliers(suppliers);
+  renderSuppliers();
+}
 
-  let summary = {};
+// Record Milk for a Supplier
+function recordMilk(id) {
+  const quantity = prompt("Enter milk quantity (in litres):");
+  if (!quantity || isNaN(quantity)) return;
 
-  milkRecords.forEach(record => {
-    const { date, supplierId, litres } = record;
-    if (!summary[date]) {
-      summary[date] = { total: 0, absentees: [] };
-    }
-    summary[date].total += litres;
-  });
+  const date = new Date().toISOString().split("T")[0];
+  const suppliers = getSuppliers();
+  const supplier = suppliers.find(s => s.id === id);
+  if (!supplier.records) supplier.records = [];
+  supplier.records.push({ date, quantity: parseFloat(quantity) });
+  supplier.totalMilk += parseFloat(quantity);
+
+  saveSuppliers(suppliers);
+  alert("Milk entry recorded.");
+}
+
+// View Supplier Details
+function viewSupplierDetail(id) {
+  const suppliers = getSuppliers();
+  const s = suppliers.find(sup => sup.id === id);
+  const logs = s.records.map(r => `<li>${r.date} — ${r.quantity}L</li>`).join("");
+  document.getElementById("admin-content").innerHTML = `
+    <h3>${s.name} (${s.id})</h3>
+    <img src="${s.photo || 'https://via.placeholder.com/100'}" width="100"/>
+    <p>Mobile: ${s.mobile}</p>
+    <p>Total Milk: ${s.totalMilk}L</p>
+    <h4>Milk Records:</h4>
+    <ul>${logs}</ul>
+    <button onclick="markPaid('${id}')">Mark as Paid</button>
+  `;
+}
+
+// Mark Paid
+function markPaid(id) {
+  const suppliers = getSuppliers();
+  const supplier = suppliers.find(s => s.id === id);
+  supplier.paid = true;
+  saveSuppliers(suppliers);
+  alert("Marked as paid.");
+}
+// Show Milk Analytics
+function viewAnalytics() {
+  const suppliers = getSuppliers();
+  const dateMap = {};
 
   suppliers.forEach(supplier => {
-    milkRecords.forEach(record => {
-      if (!milkRecords.find(r => r.date === record.date && r.supplierId === supplier.id)) {
-        if (!summary[record.date].absentees.includes(supplier.name)) {
-          summary[record.date].absentees.push(supplier.name);
-        }
+    supplier.records.forEach(rec => {
+      if (!dateMap[rec.date]) dateMap[rec.date] = 0;
+      dateMap[rec.date] += rec.quantity;
+    });
+  });
+
+  const entries = Object.entries(dateMap).sort();
+  const rows = entries.map(([date, qty]) => `<tr><td>${date}</td><td>${qty} L</td></tr>`).join("");
+
+  document.getElementById("admin-content").innerHTML = `
+    <h3>Milk Collection Summary</h3>
+    <table border="1">
+      <tr><th>Date</th><th>Total Milk</th></tr>
+      ${rows}
+    </table>
+  `;
+}
+
+// View Calendar (Who was absent on which date)
+function viewCalendar() {
+  const suppliers = getSuppliers();
+  const calendar = {};
+
+  suppliers.forEach(s => {
+    const dates = s.records.map(r => r.date);
+    const allDates = new Set(suppliers.flatMap(s => s.records.map(r => r.date)));
+    allDates.forEach(date => {
+      if (!calendar[date]) calendar[date] = [];
+      if (!dates.includes(date)) {
+        calendar[date].push(s.name);
       }
     });
   });
 
-  for (let date in summary) {
-    const div = document.createElement("div");
-    const { total, absentees } = summary[date];
-    div.innerHTML = `
-      <strong>${date}</strong>: 
-      <br>Milk Received: ${total} litres
-      <br>Absent: ${absentees.join(", ") || "None"}
-    `;
-    container.appendChild(div);
-  }
+  const content = Object.entries(calendar).map(([date, names]) => `
+    <div>
+      <strong>${date}</strong>: ${names.length ? names.join(", ") : "All Present"}
+    </div>
+  `).join("");
+
+  document.getElementById("admin-content").innerHTML = `<h3>Absentee Calendar</h3>${content}`;
 }
 
-  supplier.milkRecords.forEach(rec => {
-    const li = document.createElement("li");
-    li.textContent = `${rec.date}: ${rec.litres} L`;
-    list.appendChild(li);
-  });
-}
-
-// Product features
-function getProducts() {
-  return JSON.parse(localStorage.getItem("products") || "[]");
-}
-
-function saveProducts(products) {
-  localStorage.setItem("products", JSON.stringify(products));
+// Add Products (Visible to Suppliers)
+function showProductPanel() {
+  const form = `
+    <h3>Add Product</h3>
+    <input type="text" id="prod-name" placeholder="Product Name" />
+    <input type="text" id="prod-price" placeholder="Price (₹)" />
+    <button onclick="addProduct()">Add Product</button>
+  `;
+  document.getElementById("admin-content").innerHTML = form;
 }
 
 function addProduct() {
-  const name = document.getElementById("productName").value;
-  const price = document.getElementById("productPrice").value;
-
-  if (!name || !price) return alert("Enter both product name and price");
-  const products = getProducts();
+  const name = document.getElementById("prod-name").value;
+  const price = document.getElementById("prod-price").value;
+  const products = JSON.parse(localStorage.getItem("products") || "[]");
   products.push({ name, price });
-  saveProducts(products);
-  loadProducts();
+  localStorage.setItem("products", JSON.stringify(products));
+  alert("Product added.");
 }
 
-function loadProducts() {
-  const list = document.getElementById("productList");
-  list.innerHTML = "";
-  const products = getProducts();
-  products.forEach(p => {
-    const li = document.createElement("li");
-    li.textContent = `${p.name} - ₹${p.price}`;
-    list.appendChild(li);
-  });
+// Export Data
+function exportData() {
+  const suppliers = getSuppliers();
+  const data = JSON.stringify(suppliers, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "gvala_data.json";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-function loadProductsForSupplier() {
-  const list = document.getElementById("supplierProductList");
-  list.innerHTML = "";
-  const products = getProducts();
-  products.forEach(p => {
-    const li = document.createElement("li");
-    li.textContent = `${p.name} - ₹${p.price}`;
-    list.appendChild(li);
-  });
+// Search & Filter
+function searchSuppliers(query) {
+  const suppliers = getSuppliers().filter(s =>
+    s.name.toLowerCase().includes(query.toLowerCase()) ||
+    s.id.toLowerCase().includes(query.toLowerCase()) ||
+    s.mobile.includes(query)
+  );
+
+  const content = suppliers.map(s => `
+    <div class="supplier-card">
+      <img src="${s.photo || 'https://via.placeholder.com/80'}" width="80" height="80"/>
+      <h4>${s.name}</h4>
+      <p>ID: ${s.id}</p>
+      <p>Mobile: ${s.mobile}</p>
+      <button onclick="recordMilk('${s.id}')">Add Milk</button>
+      <button onclick="viewSupplierDetail('${s.id}')">Details</button>
+    </div>
+  `).join("");
+
+  document.getElementById("admin-content").innerHTML = `
+    <input type="text" placeholder="Search..." onkeyup="searchSuppliers(this.value)" />
+    <div class="supplier-grid">${content}</div>
+  `;
 }
+// ----------------- Persistent Login ------------------
+function checkLoginSession() {
+  const session = JSON.parse(localStorage.getItem("session"));
+  if (session?.type === "admin") {
+    adminPanel();
+  } else if (session?.type === "supplier") {
+    supplierPanel(session.id);
+  }
+}
+window.onload = checkLoginSession;
+
+// ----------------- Admin-Supplier Chat ------------------
+function openChatWith(id) {
+  const messages = JSON.parse(localStorage.getItem(`chat_${id}`) || "[]");
+  const chatUI = messages.map(msg => `
+    <div class="${msg.sender === 'admin' ? 'admin-msg' : 'supplier-msg'}">
+      <b>${msg.sender}</b>: ${msg.text}
+    </div>
+  `).join("");
+
+  const box = `
+    <div style="border:1px solid #ccc; padding:10px">
+      <h4>Chat with ${id}</h4>
+      <div id="chat-box">${chatUI}</div>
+      <input id="chat-text" placeholder="Type message..."/>
+      <button onclick="sendChatMessage('${id}')">Send</button>
+    </div>
+  `;
+  document.getElementById("admin-content").innerHTML = box;
+}
+
+function sendChatMessage(to) {
+  const input = document.getElementById("chat-text");
+  const msg = input.value.trim();
+  if (!msg) return;
+  const messages = JSON.parse(localStorage.getItem(`chat_${to}`) || "[]");
+  messages.push({ sender: "admin", text: msg, time: new Date().toISOString() });
+  localStorage.setItem(`chat_${to}`, JSON.stringify(messages));
+  openChatWith(to);
+}
+
+// ----------------- Supplier Chat View ------------------
+function supplierChatView(id) {
+  const messages = JSON.parse(localStorage.getItem(`chat_${id}`) || "[]");
+  const chatUI = messages.map(msg => `
+    <div class="${msg.sender === 'admin' ? 'admin-msg' : 'supplier-msg'}">
+      <b>${msg.sender}</b>: ${msg.text}
+    </div>
+  `).join("");
+
+  const box = `
+    <h3>Chat with Admin</h3>
+    <div id="chat-box">${chatUI}</div>
+    <input id="supplier-chat-text" placeholder="Message"/>
+    <button onclick="supplierSendMessage('${id}')">Send</button>
+  `;
+  document.getElementById("supplier-content").innerHTML = box;
+}
+
+function supplierSendMessage(id) {
+  const input = document.getElementById("supplier-chat-text");
+  const msg = input.value.trim();
+  if (!msg) return;
+  const messages = JSON.parse(localStorage.getItem(`chat_${id}`) || "[]");
+  messages.push({ sender: "supplier", text: msg, time: new Date().toISOString() });
+  localStorage.setItem(`chat_${id}`, JSON.stringify(messages));
+  supplierChatView(id);
+}
+
+// ----------------- Supplier Password Change ------------------
+function showPasswordChangePanel(id) {
+  const panel = `
+    <h3>Change Password</h3>
+    <input type="password" id="new-pass" placeholder="New Password"/>
+    <button onclick="changePassword('${id}')">Change</button>
+  `;
+  document.getElementById("supplier-content").innerHTML = panel;
+}
+
+function changePassword(id) {
+  const pass = document.getElementById("new-pass").value;
+  if (!pass) return alert("Enter a password!");
+  const suppliers = getSuppliers();
+  const sup = suppliers.find(s => s.id === id);
+  sup.password = pass;
+  saveSuppliers(suppliers);
+  alert("Password changed successfully.");
+}
+
+// ----------------- Daily Reminder System ------------------
+function reminderCheck() {
+  const today = new Date().toISOString().split("T")[0];
+  const suppliers = getSuppliers();
+  const missed = [];
+
+  suppliers.forEach(s => {
+    const hasToday = s.records.some(r => r.date === today);
+    if (!hasToday) missed.push(s.name);
+  });
+
+  if (missed.length > 0) {
+    alert(`Reminder:\nThese suppliers didn't deliver milk today:\n${missed.join(", ")}`);
+  }
+}
+setTimeout(reminderCheck, 2000); // Check shortly after load
