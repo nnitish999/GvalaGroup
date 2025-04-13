@@ -61,9 +61,9 @@ function createSupplier() {
     phone: phone,
     photo: photo,
     password: "0000", // default
-    milkRecords: [],
-    absents: [],
-    payments: []
+    milkRecords: milkrecord,
+    absents: absent,
+    payments: payment
   };
 
   addSupplier(newSupplier);
